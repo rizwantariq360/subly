@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react-native";
 import type { ImageSourcePropType } from "react-native";
 
 declare global {
