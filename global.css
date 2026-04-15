@@ -40,8 +40,8 @@
   --spacing-30: 120px;
 
   /* fonts */
-  --font-sans: sans-regular;
   --font-sans-light: sans-light;
+  --font-sans: sans-regular;
   --font-sans-medium: sans-medium;
   --font-sans-semibold: sans-semibold;
   --font-sans-bold: sans-bold;
