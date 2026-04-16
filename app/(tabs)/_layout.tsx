@@ -3,7 +3,7 @@ import { components, spacing, themeColors } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { clsx } from "clsx";
 import { Tabs } from "expo-router";
-import React from "react";
+
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
