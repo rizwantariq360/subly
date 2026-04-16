@@ -13,7 +13,7 @@ const theme = {
     "--color-border": "rgba(15, 23, 42, 0.12)",
     "--color-success": "#22c55e",
     "--color-destructive": "#ef4444",
-    "--color-subscription": "#14b8a6",
+    "--color-subscription": "#2dd4bf",
   },
 
   dark: {
@@ -27,7 +27,7 @@ const theme = {
     "--color-border": "rgba(255, 255, 255, 0.08)",
     "--color-success": "#22c55e",
     "--color-destructive": "#f87171",
-    "--color-subscription": "#2dd4bf",
+    "--color-subscription": "#14b8a6",
   },
 };
 

@@ -16,7 +16,7 @@
   --color-border: rgba(15, 23, 42, 0.12);
   --color-success: #22c55e;
   --color-destructive: #ef4444;
-  --color-subscription: #14b8a6;
+  --color-subscription: #2dd4bf;
 
   /* spacing */
   --spacing-0: 0px;
@@ -59,7 +59,7 @@
   --color-border: rgba(15, 23, 42, 0.12);
   --color-success: #22c55e;
   --color-destructive: #ef4444;
-  --color-subscription: #14b8a6;
+  --color-subscription: #2dd4bf;
 }
 
 @layer components {
@@ -96,7 +96,7 @@
   }
 
   .home-add-icon {
-    @apply size-12;
+    @apply p-2 rounded-full border border-primary/25;
   }
 
   .home-balance-card {
@@ -128,15 +128,15 @@
   }
 
   .list-action {
-    @apply rounded-full border border-black/20 px-4 py-1;
+    @apply rounded-full border border-primary/25 px-3 py-1;
   }
 
   .list-action-text {
-    @apply text-lg font-sans-semibold text-primary;
+    @apply text-base font-sans-semibold text-primary;
   }
 
   .upcoming-card {
-    @apply mr-4 w-44 rounded-2xl border border-black/10 bg-background p-4;
+    @apply mr-4 w-48 rounded-2xl border border-primary/50 p-4;
   }
 
   .upcoming-row {
@@ -144,7 +144,7 @@
   }
 
   .upcoming-icon {
-    @apply size-14;
+    @apply size-12;
   }
 
   .upcoming-price {
@@ -240,7 +240,7 @@
   }
 
   .home-empty-state {
-    @apply py-4 text-sm font-sans-medium text-black/60;
+    @apply py-4 text-sm font-sans-medium text-primary/70;
   }
 
   .auth-safe-area {

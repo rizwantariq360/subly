@@ -10,7 +10,7 @@ export const themeColors = {
     border: "rgba(15, 23, 42, 0.12)",
     success: "#22c55e",
     destructive: "#ef4444",
-    subscription: "#14b8a6",
+    subscription: "#2dd4bf",
   },
   dark: {
     background: "#0b1220",
@@ -23,7 +23,7 @@ export const themeColors = {
     border: "rgba(255, 255, 255, 0.08)",
     success: "#22c55e",
     destructive: "#f87171",
-    subscription: "#2dd4bf",
+    subscription: "#14b8a6",
   },
 } as const;
 
