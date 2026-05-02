@@ -5,8 +5,10 @@ import back from "@/assets/icons/back.png";
 import canva from "@/assets/icons/canva.png";
 import claude from "@/assets/icons/claude.png";
 import dropbox from "@/assets/icons/dropbox.png";
+import facebook from "@/assets/icons/facebook.png";
 import figma from "@/assets/icons/figma.png";
 import github from "@/assets/icons/github.png";
+import google from "@/assets/icons/google.png";
 import home from "@/assets/icons/home.png";
 import medium from "@/assets/icons/medium.png";
 import menu from "@/assets/icons/menu.png";
@@ -36,6 +38,8 @@ export const icons = {
   github,
   claude,
   canva,
+  facebook,
+  google,
 } as const;
 
 export type IconKey = keyof typeof icons;
