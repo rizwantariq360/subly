@@ -34,7 +34,7 @@ const SignUp = () => {
 
   const handleFinalize = async () => {
     await setActive({
-      session: signUp.createdSessionId!,
+      session: signUp.createdSessionId,
     });
 
     router.replace("/(tabs)");
@@ -83,7 +83,7 @@ const SignUp = () => {
       return;
     }
 
-    if (signUp.status === "complete") {
+    if (signUp.status === "complete" && signUp.createdSessionId) {
       await handleFinalize();
       return;
     }
@@ -110,7 +110,7 @@ const SignUp = () => {
       return;
     }
 
-    if (signUp.status === "complete") {
+    if (signUp.status === "complete" && signUp.createdSessionId) {
       await handleFinalize();
       return;
     }
@@ -304,9 +304,9 @@ const SignUp = () => {
                     }
                     onPress={handleSubmit}
                     disabled={
-                      !emailAddress ||
-                      !password ||
-                      !confirmPassword ||
+                      !emailAddress.trim() ||
+                      !password.trim() ||
+                      !confirmPassword.trim() ||
                       fetchStatus === "fetching"
                     }
                   >
@@ -326,6 +326,7 @@ const SignUp = () => {
                 Sign in
               </Link>
             </View>
+            <View nativeID="clerk-captcha" />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

@@ -167,12 +167,20 @@ const ForgotPassword = () => {
       return;
     }
 
-    if (signIn.status === "complete") {
+    if (signIn.status === "complete" && signIn.createdSessionId) {
       await setActive({
-        session: signIn.createdSessionId!,
+        session: signIn.createdSessionId,
       });
 
       router.replace("/(tabs)");
+      return;
+    }
+
+    if (signIn.status === "needs_second_factor") {
+      setGeneralError(
+        "Two-factor authentication is required to complete sign in.",
+      );
+
       return;
     }
 
@@ -239,10 +247,12 @@ const ForgotPassword = () => {
                   <Pressable
                     className={
                       "auth-button" +
-                      (!emailAddress || isBusy ? " auth-button-disabled" : "")
+                      (!emailAddress.trim() || isBusy
+                        ? " auth-button-disabled"
+                        : "")
                     }
                     onPress={requestReset}
-                    disabled={!emailAddress || isBusy}
+                    disabled={!emailAddress.trim() || isBusy}
                   >
                     {isBusy ? (
                       <ActivityIndicator color="#0f172a" />

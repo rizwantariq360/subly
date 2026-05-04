@@ -40,7 +40,7 @@ const SignIn = () => {
 
   const handleFinalize = async () => {
     await setActive({
-      session: signIn.createdSessionId!,
+      session: signIn.createdSessionId,
     });
 
     router.replace("/(tabs)");
@@ -99,7 +99,7 @@ const SignIn = () => {
       return;
     }
 
-    if (signIn.status === "complete") {
+    if (signIn.status === "complete" && signIn.createdSessionId) {
       await handleFinalize();
       return;
     }
@@ -140,7 +140,7 @@ const SignIn = () => {
       return;
     }
 
-    if (signIn.status === "complete") {
+    if (signIn.status === "complete" && signIn.createdSessionId) {
       await handleFinalize();
       return;
     }
@@ -224,7 +224,15 @@ const SignIn = () => {
 
                   <Pressable
                     className="auth-secondary-button"
-                    onPress={() => signIn.mfa.sendEmailCode()}
+                    onPress={async () => {
+                      try {
+                        await signIn.mfa.sendEmailCode();
+                      } catch {
+                        setGeneralError(
+                          "Failed to resend code. Please try again.",
+                        );
+                      }
+                    }}
                   >
                     <Text className="auth-secondary-button-text">
                       Resend code
@@ -232,7 +240,15 @@ const SignIn = () => {
                   </Pressable>
                   <Pressable
                     className="auth-secondary-button"
-                    onPress={() => signIn.reset()}
+                    onPress={async () => {
+                      try {
+                        await signIn.reset();
+                        setCode("");
+                        setGeneralError("");
+                      } catch {
+                        setGeneralError("Failed to reset. Please try again.");
+                      }
+                    }}
                   >
                     <Text className="auth-secondary-button-text">
                       Start over
@@ -299,12 +315,14 @@ const SignIn = () => {
                   <Pressable
                     className={
                       "auth-button" +
-                      (!emailAddress || !password || isBusy
+                      (!emailAddress.trim() || !password.trim() || isBusy
                         ? " auth-button-disabled"
                         : "")
                     }
                     onPress={handleSubmit}
-                    disabled={!emailAddress || !password || isBusy}
+                    disabled={
+                      !emailAddress.trim() || !password.trim() || isBusy
+                    }
                   >
                     {fetchStatus === "fetching" ? (
                       <ActivityIndicator color="#0f172a" />
