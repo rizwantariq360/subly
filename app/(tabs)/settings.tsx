@@ -2,11 +2,19 @@ import { useClerk } from "@clerk/expo";
 import { styled } from "nativewind";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+import { usePostHog } from "posthog-react-native";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
 const Settings = () => {
   const { signOut } = useClerk();
+  const posthog = usePostHog();
+
+  const handleSignOut = async () => {
+    posthog.capture("user_signed_out");
+    posthog.reset();
+    await signOut();
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
@@ -17,7 +25,7 @@ const Settings = () => {
         </Text>
       </View>
 
-      <Pressable className="auth-button" onPress={() => signOut()}>
+      <Pressable className="auth-button" onPress={handleSignOut}>
         <Text className="auth-button-text">Sign out</Text>
       </Pressable>
     </SafeAreaView>
