@@ -1,3 +1,4 @@
+import { spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { useClerk, useUser } from "@clerk/expo";
 import { clsx } from "clsx";
@@ -15,6 +16,7 @@ import {
   ScrollView,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
@@ -131,6 +133,7 @@ const Settings = () => {
     try {
       setIsSigningOut(true);
       posthog.capture("user_signed_out");
+      await posthog.flush();
       posthog.reset();
       await signOut();
     } finally {
@@ -189,6 +192,7 @@ const Settings = () => {
         allowsEditing: true,
         quality: 0.8,
         aspect: [1, 1],
+        base64: true,
       });
 
       if (result.canceled || !result.assets[0]) {
@@ -196,16 +200,16 @@ const Settings = () => {
       }
 
       const asset = result.assets[0];
-      const fileName = asset.fileName || `avatar-${Date.now()}.jpg`;
       const mimeType = asset.mimeType || "image/jpeg";
+      const base64 = asset.base64;
 
-      await user.setProfileImage({
-        file: {
-          uri: asset.uri,
-          name: fileName,
-          type: mimeType,
-        } as unknown as File,
-      });
+      if (!base64) {
+        setAvatarError("Unable to encode the selected image.");
+        return;
+      }
+
+      const dataUrl = `data:${mimeType};base64,${base64}`;
+      await user.setProfileImage({ file: dataUrl });
 
       setAvatarSuccess("Avatar updated successfully.");
     } catch (error) {
@@ -273,9 +277,9 @@ const Settings = () => {
                   Manage your profile and account security.
                 </Text>
               </View>
-              <Pressable
+              <TouchableOpacity
                 className={clsx(
-                  "h-12 w-12 items-center justify-center rounded-full border border-border bg-card",
+                  "p-2.5 rounded-full border border-primary/25",
                   (isSigningOut || !isLoaded) && "opacity-50",
                 )}
                 onPress={handleSignOut}
@@ -284,9 +288,9 @@ const Settings = () => {
                 {isSigningOut ? (
                   <ActivityIndicator color={colors.primary} size="small" />
                 ) : (
-                  <LogOut size={20} color={colors.primary} />
+                  <LogOut size={spacing[5]} color={colors.primary} />
                 )}
-              </Pressable>
+              </TouchableOpacity>
             </View>
 
             <View className="auth-card profile-card">

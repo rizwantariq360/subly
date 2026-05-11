@@ -1,14 +1,20 @@
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack, usePathname, useGlobalSearchParams } from "expo-router";
+import {
+  SplashScreen,
+  Stack,
+  useGlobalSearchParams,
+  usePathname,
+} from "expo-router";
 
 import "@/global.css";
 
+import { posthog } from "@/lib/posthog";
+import { SubscriptionsProvider } from "@/lib/subscriptions";
 import { ThemeProvider } from "@/theme/ThemeProvider";
 import { ClerkProvider, useAuth } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
-import { useEffect, useRef } from "react";
 import { PostHogProvider } from "posthog-react-native";
-import { posthog } from "@/lib/posthog";
+import { useEffect, useRef } from "react";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -40,9 +46,21 @@ function RootLayoutContent() {
 
   useEffect(() => {
     if (previousPathname.current !== pathname) {
+      const safeKeys = ["utm_source", "utm_medium", "ref"];
+      const safeParams = safeKeys.reduce<Record<string, string | string[]>>(
+        (acc, key) => {
+          const value = params[key];
+          if (value != null) {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        {},
+      );
+
       posthog.screen(pathname, {
         previous_screen: previousPathname.current ?? null,
-        ...params,
+        ...safeParams,
       });
       previousPathname.current = pathname;
     }
@@ -66,7 +84,9 @@ export default function RootLayout() {
             propsToCapture: ["testID"],
           }}
         >
-          <RootLayoutContent />
+          <SubscriptionsProvider>
+            <RootLayoutContent />
+          </SubscriptionsProvider>
         </PostHogProvider>
       </ClerkProvider>
     </ThemeProvider>

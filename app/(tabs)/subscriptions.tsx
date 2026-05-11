@@ -1,5 +1,5 @@
 import SubscriptionCard from "@/components/SubscriptionCard";
-import { HOME_SUBSCRIPTIONS } from "@/constants/data";
+import { useSubscriptions } from "@/lib/subscriptions";
 import { styled } from "nativewind";
 import { useEffect, useMemo, useState } from "react";
 
@@ -9,14 +9,15 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 const SafeAreaView = styled(RNSafeAreaView);
 
 const Subscriptions = () => {
+  const { subscriptions } = useSubscriptions();
   const [expandedSubId, setExpandedSubId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredSubscriptions = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
-    if (!normalizedQuery) return HOME_SUBSCRIPTIONS;
+    if (!normalizedQuery) return subscriptions;
 
-    return HOME_SUBSCRIPTIONS.filter((subscription) => {
+    return subscriptions.filter((subscription) => {
       const searchableFields = [
         subscription.name,
         subscription.plan,
@@ -26,7 +27,7 @@ const Subscriptions = () => {
         field?.toLowerCase().includes(normalizedQuery),
       );
     });
-  }, [searchQuery]);
+  }, [searchQuery, subscriptions]);
 
   useEffect(() => {
     if (

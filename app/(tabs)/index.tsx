@@ -2,14 +2,11 @@ import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
-import {
-  HOME_BALANCE,
-  HOME_SUBSCRIPTIONS,
-  UPCOMING_SUBSCRIPTIONS,
-} from "@/constants/data";
+import { HOME_BALANCE, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
 import images from "@/constants/images";
 import { spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { useSubscriptions } from "@/lib/subscriptions";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
@@ -27,9 +24,8 @@ const Home = () => {
   const { colors } = useAppTheme();
   const { user } = useUser();
   const posthog = usePostHog();
+  const { subscriptions, addSubscription } = useSubscriptions();
   const [expandedSubId, setExpandedSubId] = useState<string | null>(null);
-  const [subscriptions, setSubscriptions] =
-    useState<Subscription[]>(HOME_SUBSCRIPTIONS);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const handleSubscriptionPress = (item: Subscription) => {
     const isExpanding = expandedSubId !== item.id;
@@ -48,7 +44,7 @@ const Home = () => {
   };
 
   const handleSubscriptionCreated = (newSubscription: Subscription) => {
-    setSubscriptions((prev) => [newSubscription, ...prev]);
+    addSubscription(newSubscription);
     posthog.capture("subscription_created", {
       subscription_name: newSubscription.name,
       subscription_category: newSubscription.category || "",

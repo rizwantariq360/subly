@@ -106,15 +106,27 @@ const CreateSubscriptionModal = ({
     onClose();
   };
 
+  const parsePriceValue = (value: string) => {
+    const normalized = value.trim();
+    const validPricePattern = /^\d+(?:\.\d{1,2})?$/;
+    if (!validPricePattern.test(normalized)) {
+      return undefined;
+    }
+
+    const parsed = Number(normalized);
+    return parsed > 0 ? parsed : undefined;
+  };
+
   const isFormValid = () => {
     const nameValid = formData.name.trim().length > 0;
-    const priceValid = parseFloat(formData.price) > 0;
+    const priceValid = parsePriceValue(formData.price) !== undefined;
     const categoryValid = formData.category !== null;
     return nameValid && priceValid && categoryValid;
   };
 
   const handleSubmit = () => {
-    if (!isFormValid()) return;
+    const priceValue = parsePriceValue(formData.price);
+    if (!isFormValid() || priceValue === undefined) return;
 
     const now = dayjs();
     const renewalDate =
@@ -129,7 +141,7 @@ const CreateSubscriptionModal = ({
       category: formData.category!,
       status: "active",
       startDate: now.toISOString(),
-      price: parseFloat(formData.price),
+      price: priceValue,
       currency: "USD",
       billing: formData.frequency,
       renewalDate: renewalDate.toISOString(),
