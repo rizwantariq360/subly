@@ -15,12 +15,14 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+import { usePostHog } from "posthog-react-native";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
 const SignUp = () => {
   const { signUp, errors, fetchStatus } = useSignUp();
   const { setActive } = useClerk();
+  const posthog = usePostHog();
   const router = useRouter();
 
   const [emailAddress, setEmailAddress] = useState("");
@@ -33,9 +35,17 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleFinalize = async () => {
+    const userId = signUp.createdUserId;
     await setActive({
       session: signUp.createdSessionId,
     });
+
+    if (userId) {
+      posthog.identify(userId, {
+        $set_once: { signup_date: new Date().toISOString() },
+      });
+    }
+    posthog.capture("user_signed_up");
 
     router.replace("/(tabs)");
   };

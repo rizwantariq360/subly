@@ -1,21 +1,20 @@
+import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
-import {
-  HOME_BALANCE,
-  HOME_SUBSCRIPTIONS,
-  HOME_USER,
-  UPCOMING_SUBSCRIPTIONS,
-} from "@/constants/data";
+import { HOME_BALANCE, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
 import images from "@/constants/images";
 import { spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { useSubscriptions } from "@/lib/subscriptions";
 import { formatCurrency } from "@/lib/utils";
+import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
 import { Plus } from "lucide-react-native";
 import { styled } from "nativewind";
 import { useState } from "react";
 
+import { usePostHog } from "posthog-react-native";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
@@ -23,10 +22,42 @@ const SafeAreaView = styled(RNSafeAreaView);
 
 const Home = () => {
   const { colors } = useAppTheme();
+  const { user } = useUser();
+  const posthog = usePostHog();
+  const { subscriptions, addSubscription } = useSubscriptions();
   const [expandedSubId, setExpandedSubId] = useState<string | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const handleSubscriptionPress = (item: Subscription) => {
+    const isExpanding = expandedSubId !== item.id;
     setExpandedSubId((currentId) => (currentId === item.id ? null : item.id));
+    if (isExpanding) {
+      posthog.capture("subscription_card_expanded", {
+        subscription_id: item.id,
+        subscription_name: item.name,
+      });
+    }
   };
+
+  const handleAddPress = () => {
+    posthog.capture("subscription_add_tapped");
+    setIsModalVisible(true);
+  };
+
+  const handleSubscriptionCreated = (newSubscription: Subscription) => {
+    addSubscription(newSubscription);
+    posthog.capture("subscription_created", {
+      subscription_name: newSubscription.name,
+      subscription_category: newSubscription.category || "",
+      subscription_price: newSubscription.price,
+      subscription_frequency: newSubscription.billing,
+    });
+  };
+
+  const displayName =
+    user?.firstName ||
+    user?.fullName ||
+    user?.emailAddresses[0]?.emailAddress ||
+    "User";
   return (
     <SafeAreaView className="flex-1 bg-background p-5 pb-12">
       <View>
@@ -35,10 +66,24 @@ const Home = () => {
             <>
               <View className="home-header">
                 <View className="home-user">
-                  <Image source={images.avatar} className="home-avatar" />
-                  <Text className="home-user-name">{HOME_USER.name}</Text>
+                  <Image
+                    source={
+                      user?.imageUrl ? { uri: user.imageUrl } : images.avatar
+                    }
+                    className="home-avatar"
+                  />
+                  <Text
+                    className="home-user-name"
+                    ellipsizeMode="tail"
+                    numberOfLines={1}
+                  >
+                    {displayName}
+                  </Text>
                 </View>
-                <TouchableOpacity className="home-add-icon">
+                <TouchableOpacity
+                  className="home-add-icon"
+                  onPress={handleAddPress}
+                >
                   <Plus size={spacing[5]} color={colors.primary} />
                 </TouchableOpacity>
               </View>
@@ -73,7 +118,7 @@ const Home = () => {
               <ListHeading title="All Subscription" />
             </>
           )}
-          data={HOME_SUBSCRIPTIONS}
+          data={subscriptions}
           renderItem={({ item }) => (
             <SubscriptionCard
               {...item}
@@ -91,6 +136,12 @@ const Home = () => {
           contentContainerClassName="pb-14"
         />
       </View>
+
+      <CreateSubscriptionModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onSubmit={handleSubscriptionCreated}
+      />
     </SafeAreaView>
   );
 };

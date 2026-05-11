@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+import { usePostHog } from "posthog-react-native";
 
 const SafeAreaView = styled(RNSafeAreaView);
 const emailPattern = /^\S+@\S+\.\S+$/;
@@ -29,6 +30,7 @@ type AuthFormErrors = Partial<{
 const ForgotPassword = () => {
   const { signIn, fetchStatus } = useSignIn();
   const { setActive } = useClerk();
+  const posthog = usePostHog();
   const router = useRouter();
 
   const [emailAddress, setEmailAddress] = useState("");
@@ -104,6 +106,7 @@ const ForgotPassword = () => {
       return;
     }
 
+    posthog.capture("password_reset_requested");
     setStage("code");
   };
 
@@ -168,6 +171,7 @@ const ForgotPassword = () => {
     }
 
     if (signIn.status === "complete" && signIn.createdSessionId) {
+      posthog.capture("password_reset_completed");
       await setActive({
         session: signIn.createdSessionId,
       });

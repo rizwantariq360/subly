@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+import { usePostHog } from "posthog-react-native";
 
 const SafeAreaView = styled(RNSafeAreaView);
 const emailPattern = /^\S+@\S+\.\S+$/;
@@ -28,6 +29,7 @@ type AuthFormErrors = Partial<{
 const SignIn = () => {
   const { signIn, errors, fetchStatus } = useSignIn();
   const { setActive } = useClerk();
+  const posthog = usePostHog();
 
   const router = useRouter();
 
@@ -42,6 +44,8 @@ const SignIn = () => {
     await setActive({
       session: signIn.createdSessionId,
     });
+
+    posthog.capture("user_signed_in");
 
     router.replace("/(tabs)");
   };
