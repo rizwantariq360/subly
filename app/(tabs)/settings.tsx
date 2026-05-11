@@ -132,10 +132,10 @@ const Settings = () => {
   const handleSignOut = async () => {
     try {
       setIsSigningOut(true);
+      await signOut();
       posthog.capture("user_signed_out");
       await posthog.flush();
       posthog.reset();
-      await signOut();
     } finally {
       setIsSigningOut(false);
     }
