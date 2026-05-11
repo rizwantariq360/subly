@@ -1,3 +1,4 @@
+import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
@@ -16,9 +17,9 @@ import { Plus } from "lucide-react-native";
 import { styled } from "nativewind";
 import { useState } from "react";
 
+import { usePostHog } from "posthog-react-native";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
-import { usePostHog } from "posthog-react-native";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -27,6 +28,9 @@ const Home = () => {
   const { user } = useUser();
   const posthog = usePostHog();
   const [expandedSubId, setExpandedSubId] = useState<string | null>(null);
+  const [subscriptions, setSubscriptions] =
+    useState<Subscription[]>(HOME_SUBSCRIPTIONS);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const handleSubscriptionPress = (item: Subscription) => {
     const isExpanding = expandedSubId !== item.id;
     setExpandedSubId((currentId) => (currentId === item.id ? null : item.id));
@@ -40,6 +44,17 @@ const Home = () => {
 
   const handleAddPress = () => {
     posthog.capture("subscription_add_tapped");
+    setIsModalVisible(true);
+  };
+
+  const handleSubscriptionCreated = (newSubscription: Subscription) => {
+    setSubscriptions((prev) => [newSubscription, ...prev]);
+    posthog.capture("subscription_created", {
+      subscription_name: newSubscription.name,
+      subscription_category: newSubscription.category || "",
+      subscription_price: newSubscription.price,
+      subscription_frequency: newSubscription.billing,
+    });
   };
 
   const displayName =
@@ -61,9 +76,18 @@ const Home = () => {
                     }
                     className="home-avatar"
                   />
-                  <Text className="home-user-name">{displayName}</Text>
+                  <Text
+                    className="home-user-name"
+                    ellipsizeMode="tail"
+                    numberOfLines={1}
+                  >
+                    {displayName}
+                  </Text>
                 </View>
-                <TouchableOpacity className="home-add-icon" onPress={handleAddPress}>
+                <TouchableOpacity
+                  className="home-add-icon"
+                  onPress={handleAddPress}
+                >
                   <Plus size={spacing[5]} color={colors.primary} />
                 </TouchableOpacity>
               </View>
@@ -98,7 +122,7 @@ const Home = () => {
               <ListHeading title="All Subscription" />
             </>
           )}
-          data={HOME_SUBSCRIPTIONS}
+          data={subscriptions}
           renderItem={({ item }) => (
             <SubscriptionCard
               {...item}
@@ -116,6 +140,12 @@ const Home = () => {
           contentContainerClassName="pb-14"
         />
       </View>
+
+      <CreateSubscriptionModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onSubmit={handleSubscriptionCreated}
+      />
     </SafeAreaView>
   );
 };
